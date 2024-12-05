@@ -5,7 +5,10 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/sgitwhyd/music-catalogue/internal/configs"
+	"github.com/sgitwhyd/music-catalogue/internal/handlers"
 	"github.com/sgitwhyd/music-catalogue/internal/models"
+	"github.com/sgitwhyd/music-catalogue/internal/repositorys"
+	"github.com/sgitwhyd/music-catalogue/internal/services"
 	"github.com/sgitwhyd/music-catalogue/pkg/internalsql"
 )
 
@@ -26,8 +29,24 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	// migrate db
 	db.AutoMigrate(&models.User{})
 
-	route := gin.Default()
-	route.Run(config.PORT)
+
+	r := gin.Default()
+	route :=r.Group("/api/v1")
+
+	// repositorys
+	userRepo := repositorys.NewUserRepo(db)
+
+	// services
+	userService := services.NewUserService(userRepo)
+
+	// handlers
+	userHandler := handlers.NewUserHandler(userService, route)
+
+	// register route
+	userHandler.RegisterRoute()
+
+	r.Run(config.PORT)
 }
