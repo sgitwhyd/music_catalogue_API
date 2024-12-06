@@ -9,8 +9,8 @@ import (
 
 func CreateToken(UserID int64, username, secretKey string) (string, error) {
 
-	if UserID == 0  || username == "" || secretKey == "" {
-		return "", errors.New("user id must be provided")
+	if secretKey == "" {
+		return "", errors.New("need secret key")
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
