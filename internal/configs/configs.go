@@ -1,9 +1,13 @@
 package configs
 
-import "github.com/spf13/viper"
+import (
+	"fmt"
+
+	"github.com/spf13/viper"
+)
 
 type (
-	config struct {
+	Config struct {
 		DatabaseURL string 	`mapstructure:"DATABASE_URL"`
 		SecretJWT   string 	`mapstructure:"SECRET_JWT"`
 		PORT        string 	`mapstructure:"PORT"`
@@ -15,7 +19,11 @@ func Init(
 	Path,
 	ConfigType,
 	ConfigName string,
-) (*config, error) {
+) (*Config, error) {
+	if Path == "" || ConfigType == "" || ConfigName == "" {
+		return nil, fmt.Errorf("Path, ConfigType, and ConfigName are required")
+	}
+	
 	viper.AutomaticEnv()
 	viper.AddConfigPath(Path)
 	viper.SetConfigType(ConfigType)
@@ -23,10 +31,10 @@ func Init(
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		return &config{}, err
+		return &Config{}, err
 	}
 
-	var config config
+	var config Config
 	if err := viper.Unmarshal(&config); err != nil {
 		return nil, err
 	}

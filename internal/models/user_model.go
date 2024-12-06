@@ -15,4 +15,12 @@ type (
 		Email		 	string 		`json:"email" binding:"required"` 
 		Password 	string			`json:"password" binding:"required"`
 	}
+	SignInRequest struct {
+		Email		 	string 		`json:"email" binding:"required"` 
+		Password 	string			`json:"password" binding:"required"`
+	}
+
+	LoginResponse struct {
+		AccessToken string `json:"access_token"`
+	}
 )
