@@ -40,7 +40,7 @@ func main() {
 	userRepo := repositorys.NewUserRepo(db)
 
 	// services
-	userService := services.NewUserService(userRepo)
+	userService := services.NewUserService(userRepo, *config)
 
 	// handlers
 	userHandler := handlers.NewUserHandler(userService, route)

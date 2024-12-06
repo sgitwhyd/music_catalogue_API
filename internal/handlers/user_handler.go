@@ -59,8 +59,35 @@ func (h *userHandler) SignUp(c *gin.Context) {
 	})
 }
 
+func (h *userHandler) SignIn(c *gin.Context) {
+	var request models.SignInRequest
+
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	token, err := h.userService.Login(request)
+	if err != nil {
+		log.Error().Err(err).Msg("error handler: Login")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.LoginResponse{
+		AccessToken: token,
+	})
+
+}
+
 func (h *userHandler) RegisterRoute(){
 	route := h.route.Group("/auth")
 
 	route.POST("/signup", h.SignUp)
+	route.POST("/signin", h.SignIn)
 }
