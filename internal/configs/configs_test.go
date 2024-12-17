@@ -30,6 +30,8 @@ func TestInit(t *testing.T) {
 					PORT: ":3002",
 					ENV: "debug",
 					SecretJWT: "secret",
+					SpotifyClientID: "123",
+					SpotifyClientSecret: "123",
 				},
 				wantErr: false,
 		},

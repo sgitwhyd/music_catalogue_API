@@ -8,12 +8,16 @@ import (
 
 type (
 	Config struct {
-		DatabaseURL string 	`mapstructure:"DATABASE_URL"`
-		SecretJWT   string 	`mapstructure:"SECRET_JWT"`
-		PORT        string 	`mapstructure:"PORT"`
-		ENV					string	`mapstructure:"ENV"`
+		DatabaseURL 						string 	`mapstructure:"DATABASE_URL"`
+		SecretJWT   						string 	`mapstructure:"SECRET_JWT"`
+		PORT        						string 	`mapstructure:"PORT"`
+		ENV											string	`mapstructure:"ENV"`
+		SpotifyClientID					string	`mapstructure:"SPOTIFY_CLIENT_ID"`
+		SpotifyClientSecret			string	`mapstructure:"SPOTIFY_CLIENT_SECRET"`
 	}
 )
+
+var config *Config
 
 func Init(
 	Path,
@@ -21,13 +25,15 @@ func Init(
 	ConfigName string,
 ) (*Config, error) {
 	if Path == "" || ConfigType == "" || ConfigName == "" {
-		return nil, fmt.Errorf("Path, ConfigType, and ConfigName are required")
+		return nil, fmt.Errorf("path, configType, and configName are required")
 	}
 	
 	viper.AutomaticEnv()
 	viper.AddConfigPath(Path)
 	viper.SetConfigType(ConfigType)
 	viper.SetConfigName(ConfigName)
+
+	config = new(Config)
 
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -41,4 +47,12 @@ func Init(
 
 
 	return &config, nil
+}
+
+func Get() *Config{
+	if config != nil {
+		config = &Config{}
+	}
+
+	return config
 }
