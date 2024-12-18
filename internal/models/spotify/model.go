@@ -1,5 +1,7 @@
 package spotify
 
+import "gorm.io/gorm"
+
 type (
 	SearchResponse struct {
 		Items  []SpotifyTrackObjectResponse `json:"items"`
@@ -23,5 +25,22 @@ type (
 		Href     string `json:"href"`
 		ID       string `json:"id"`
 		Name     string `json:"name"`
+		IsLiked  *bool	`json:"is_liked"`
+	}
+)
+
+// track activities
+
+type (
+	TrackActivity struct {
+		gorm.Model
+		UserID 		uint `gorm:"not null"`
+		SpotifyID string `gorm:"not null"`
+		IsLiked 	*bool
+	}
+
+	TrackActivityRequest struct {
+		SpotifyID string `json:"spotify_id" binding:"required"`
+		IsLiked *bool `json:"is_liked"`
 	}
 )
