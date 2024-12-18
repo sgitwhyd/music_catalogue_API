@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +10,7 @@ import (
 	"github.com/sgitwhyd/music-catalogue/internal/handlers"
 	"github.com/sgitwhyd/music-catalogue/internal/handlers/spotify"
 	"github.com/sgitwhyd/music-catalogue/internal/models"
+	spotifyModel "github.com/sgitwhyd/music-catalogue/internal/models/spotify"
 	"github.com/sgitwhyd/music-catalogue/internal/repositorys"
 	spotifyRepo "github.com/sgitwhyd/music-catalogue/internal/repositorys/spotify"
 	"github.com/sgitwhyd/music-catalogue/internal/services"
@@ -24,7 +24,6 @@ func main() {
 	if err != nil {
 		log.Error().Err(err).Msgf("load config error %v", err)
 	}
-	log.Info().Msg("load config success")
 	
 	db, err := internalsql.Connect(config.DatabaseURL)
 	if err != nil {
@@ -39,6 +38,7 @@ func main() {
 
 	// migrate db
 	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&spotifyModel.TrackActivity{})
 
 
 	r := gin.Default()
@@ -54,20 +54,12 @@ func main() {
 	// repositorys
 	spotifyOutbond := spotifyRepo.NewSpotifyOutbond(config, client)
 	userRepo := repositorys.NewUserRepo(db)
+	spotifyRepository := spotifyRepo.NewSpotifyRepository(db)
 
-	data, e, err := spotifyOutbond.GetTokenDetails()
-	if err != nil {
-		log.Error().Err(err).Msg("error")
-		return
-	}
-
-	log.Info().Msg("test")
-	fmt.Printf("data: %v, e: %v", data, e)
-	
 
 	// services
-	userService := services.NewUserService(userRepo, *config)
-	spotifyService := spotifySvc.NewSpotifyServie(spotifyOutbond)
+	userService := services.NewUserService(userRepo, config)
+	spotifyService := spotifySvc.NewSpotifyServie(spotifyOutbond, spotifyRepository)
 
 	// // handlers
 	userHandler := handlers.NewUserHandler(userService, route)
