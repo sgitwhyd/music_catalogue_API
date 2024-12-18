@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func CreateToken(UserID int64, username, secretKey string) (string, error) {
+func CreateToken(UserID uint, username, secretKey string) (string, error) {
 
 	if secretKey == "" {
 		return "", errors.New("need secret key")
@@ -28,7 +28,7 @@ func CreateToken(UserID int64, username, secretKey string) (string, error) {
 	return tokenStr, nil
 }
 
-func ValidateToken(tokenReq string, secretKey string) (int64, string, error) {
+func ValidateToken(tokenReq string, secretKey string) (uint, string, error) {
 	key := []byte(secretKey)
 	claims := jwt.MapClaims{}
 
@@ -43,10 +43,10 @@ func ValidateToken(tokenReq string, secretKey string) (int64, string, error) {
 		return 0, "", errors.New("invalid token")
 	}
 
-	return int64(claims["id"].(float64)), claims["username"].(string), nil
+	return uint(claims["id"].(float64)), claims["username"].(string), nil
 }
 
-func ValidateTokenWithoutExpiry(tokenReq string, secretKey string) (int64, string, error) {
+func ValidateTokenWithoutExpiry(tokenReq string, secretKey string) (uint, string, error) {
 	key := []byte(secretKey)
 	claims := jwt.MapClaims{}
 
@@ -61,5 +61,5 @@ func ValidateTokenWithoutExpiry(tokenReq string, secretKey string) (int64, strin
 		return 0, "", errors.New("invalid token")
 	}
 
-	return int64(claims["id"].(float64)), claims["username"].(string), nil
+	return uint(claims["id"].(float64)), claims["username"].(string), nil
 }
