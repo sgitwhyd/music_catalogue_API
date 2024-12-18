@@ -91,7 +91,7 @@ func Test_userService_Login(t *testing.T) {
 
 	// Initialize the userService with the mock repository
 	userService := &userService{
-		config: configs.Config{
+		config: &configs.Config{
 			SecretJWT: "secret",
 			DatabaseURL: "",
 			PORT: "",
