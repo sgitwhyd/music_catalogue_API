@@ -14,48 +14,8 @@ import (
 	reflect "reflect"
 
 	spotify "github.com/sgitwhyd/music-catalogue/internal/models/spotify"
-	spotify0 "github.com/sgitwhyd/music-catalogue/internal/repositorys/spotify"
 	gomock "go.uber.org/mock/gomock"
 )
-
-// MockSpotifyRepository is a mock of SpotifyRepository interface.
-type MockSpotifyRepository struct {
-	ctrl     *gomock.Controller
-	recorder *MockSpotifyRepositoryMockRecorder
-	isgomock struct{}
-}
-
-// MockSpotifyRepositoryMockRecorder is the mock recorder for MockSpotifyRepository.
-type MockSpotifyRepositoryMockRecorder struct {
-	mock *MockSpotifyRepository
-}
-
-// NewMockSpotifyRepository creates a new mock instance.
-func NewMockSpotifyRepository(ctrl *gomock.Controller) *MockSpotifyRepository {
-	mock := &MockSpotifyRepository{ctrl: ctrl}
-	mock.recorder = &MockSpotifyRepositoryMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockSpotifyRepository) EXPECT() *MockSpotifyRepositoryMockRecorder {
-	return m.recorder
-}
-
-// Search mocks base method.
-func (m *MockSpotifyRepository) Search(ctx context.Context, query string, limit, offset int) (*spotify0.SpotifySearchResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Search", ctx, query, limit, offset)
-	ret0, _ := ret[0].(*spotify0.SpotifySearchResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Search indicates an expected call of Search.
-func (mr *MockSpotifyRepositoryMockRecorder) Search(ctx, query, limit, offset any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockSpotifyRepository)(nil).Search), ctx, query, limit, offset)
-}
 
 // MockSpotifyService is a mock of SpotifyService interface.
 type MockSpotifyService struct {
@@ -82,16 +42,30 @@ func (m *MockSpotifyService) EXPECT() *MockSpotifyServiceMockRecorder {
 }
 
 // Search mocks base method.
-func (m *MockSpotifyService) Search(ctx context.Context, query string, pageSize, pageIndex int) (*spotify.SearchResponse, error) {
+func (m *MockSpotifyService) Search(ctx context.Context, query string, pageSize, pageIndex int, userID uint) (*spotify.SearchResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Search", ctx, query, pageSize, pageIndex)
+	ret := m.ctrl.Call(m, "Search", ctx, query, pageSize, pageIndex, userID)
 	ret0, _ := ret[0].(*spotify.SearchResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Search indicates an expected call of Search.
-func (mr *MockSpotifyServiceMockRecorder) Search(ctx, query, pageSize, pageIndex any) *gomock.Call {
+func (mr *MockSpotifyServiceMockRecorder) Search(ctx, query, pageSize, pageIndex, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockSpotifyService)(nil).Search), ctx, query, pageSize, pageIndex)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockSpotifyService)(nil).Search), ctx, query, pageSize, pageIndex, userID)
+}
+
+// UpSertActivity mocks base method.
+func (m *MockSpotifyService) UpSertActivity(ctx context.Context, userID uint, request spotify.TrackActivityRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpSertActivity", ctx, userID, request)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpSertActivity indicates an expected call of UpSertActivity.
+func (mr *MockSpotifyServiceMockRecorder) UpSertActivity(ctx, userID, request any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpSertActivity", reflect.TypeOf((*MockSpotifyService)(nil).UpSertActivity), ctx, userID, request)
 }
