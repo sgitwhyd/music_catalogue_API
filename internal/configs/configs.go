@@ -37,21 +37,20 @@ func Init(
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		return &Config{}, err
+		return nil, err
 	}
 
-	var config Config
-	if err := viper.Unmarshal(&config); err != nil {
+	if err := viper.Unmarshal(config); err != nil {
 		return nil, err
 	}
 
 
-	return &config, nil
+	return config, nil
 }
 
 func Get() *Config{
-	if config != nil {
-		config = &Config{}
+	if config == nil {
+		return &Config{}
 	}
 
 	return config
