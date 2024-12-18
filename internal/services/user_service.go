@@ -24,11 +24,11 @@ type UserService interface{
 }
 
 type userService struct {
-	config configs.Config
+	config *configs.Config
 	userRepo UserRepo
 }
 
-func NewUserService(userRepo UserRepo, config configs.Config) *userService {
+func NewUserService(userRepo UserRepo, config *configs.Config) *userService {
 	return &userService{
 		userRepo: userRepo,
 		config: config,
@@ -80,7 +80,8 @@ func (s *userService) Login(request models.SignInRequest) (string, error) {
 		return "", errors.New("password doesn't match")
 	}
 
-	jwtToken, err := jwt.CreateToken(int64(foundedUser.ID), foundedUser.Username, s.config.SecretJWT)
+	log.Info().Msgf("service level secret: %v", s.config.SecretJWT)
+	jwtToken, err := jwt.CreateToken(foundedUser.ID, foundedUser.Username, s.config.SecretJWT)
 	if err != nil {
 		return "", err
 	}
