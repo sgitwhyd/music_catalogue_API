@@ -8,7 +8,7 @@ import (
 
 func TestCreateToken(t *testing.T) {
 	type args struct {
-		UserID    int64
+		UserID    uint
 		username  string
 		secretKey string
 	}
@@ -64,7 +64,7 @@ func TestValidateToken(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    int64
+		want    uint
 		want1   string
 		wantErr bool
 	}{
@@ -73,7 +73,7 @@ func TestValidateToken(t *testing.T) {
 			name: "should validated token successfully",
 			args: func() args  {
 				secretKey := "secret"
-				userID := int64(1)
+				userID := uint(1)
 				username := "developer"
 				token, err := CreateToken(userID, username, secretKey)
 				if err != nil {
