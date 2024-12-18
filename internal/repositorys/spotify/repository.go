@@ -2,13 +2,9 @@ package spotify
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/url"
-	"strconv"
 
-	"github.com/rs/zerolog/log"
+	"github.com/sgitwhyd/music-catalogue/internal/models/spotify"
+	"gorm.io/gorm"
 )
 
 type (
@@ -53,51 +49,58 @@ type (
 )
 
 
-type SpotifyRepository interface {
-	Search(ctx context.Context, query string, limit, offset int) (*SpotifySearchResponse, error)
+type spotifyRepository struct {
+	db *gorm.DB
 }
 
-func (o *outbond) Search(ctx context.Context, query string, limit, offset int) (*SpotifySearchResponse, error) {
-	// set url params
-	params := url.Values{}
-	params.Set("q", query)
-	params.Set("type", "track")
-	params.Set("limit", strconv.Itoa(limit))
-	params.Set("offset", strconv.Itoa(offset))
+func NewSpotifyRepository (db *gorm.DB) *spotifyRepository {
+	return &spotifyRepository{
+		db: db,
+	}
+}
 
-	BASE_URL := "https://api.spotify.com/v1/search"
-	SEARCH_ENDPOINT := fmt.Sprintf(`%s?%s`, BASE_URL, params.Encode())
+//go:generate mockgen -source=repository.go -destination=../../services/spotify/service_mock_test.go -package=spotify
+type SpotifyOutbond interface {
+	Search(ctx context.Context, query string, limit, offset int) (*SpotifySearchResponse, error)
+}
+type SpotifyRepository interface {
+	Create(ctx context.Context, model spotify.TrackActivity) error
+	Update(ctx context.Context, model spotify.TrackActivity) error
+	Get(ctx context.Context, UserID uint, spotifyID string) (*spotify.TrackActivity, error)
+	GetBulkSpotifyIDs(ctx context.Context, UserID uint, spotifyIDs []string) (map[string]spotify.TrackActivity, error)
+}
 
-	// get token GetTokenDetails
-	accessToken, tokenType, err := o.GetTokenDetails()
-	if err != nil {
-		return nil, err
+func (r *spotifyRepository) Create(ctx context.Context, model spotify.TrackActivity) error {
+	return r.db.Create(&model).Error
+}
+
+func (r *spotifyRepository) Update(ctx context.Context, model spotify.TrackActivity) error {
+	return r.db.Save(&model).Error
+}
+
+func (r *spotifyRepository) Get(ctx context.Context, UserID uint, spotifyID string) (*spotify.TrackActivity, error) {
+	activity := spotify.TrackActivity{}
+
+	response := r.db.Where("user_id = ?", UserID).Where("spotify_id = ?", spotifyID).First(&activity)
+	if response.Error != nil {
+		return nil, response.Error
 	}
 
-	BEARER_TOKEN := fmt.Sprintf("%s %s", tokenType, accessToken)
+	return &activity, nil
+}
 
-	req, err := http.NewRequest(http.MethodGet, SEARCH_ENDPOINT, nil)
-	if err != nil {
-		log.Error().Err(err).Msg("error create request spotify search")
-		return nil, err
+func (r *spotifyRepository) GetBulkSpotifyIDs(ctx context.Context, UserID uint, spotifyIDs []string) (map[string]spotify.TrackActivity, error) {
+	activities := []spotify.TrackActivity{}
+
+	response := r.db.Where("user_id = ?", UserID).Where("spotify_id IN ?", spotifyIDs).Find(&activities)
+	if response.Error != nil {
+		return nil, response.Error
 	}
 
-	req.Header.Set("Authorization", BEARER_TOKEN)
-	resp, err := o.client.Do(req)
-	if err != nil {
-		log.Error().Err(err).Msg("error execute search spotify")
-		return nil, err
+	result := make(map[string]spotify.TrackActivity, 0)
+	for _,activity:=range activities {
+		result[activity.SpotifyID] = activity
 	}
 
-	defer resp.Body.Close()
-
-	var response SpotifySearchResponse
-	err = json.NewDecoder(resp.Body).Decode(&response)
-	if err != nil {
-		log.Error().Err(err).Msg("error decoded spotify search response")
-		return nil, err
-	}
-
-	return &response, nil
-
+	return result, nil
 }
